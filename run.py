@@ -1,15 +1,6 @@
-import sys
-import operator
 import os
 import numpy as np
-import pandas as pd
-import time
-import json
-from operator import itemgetter
 import csv
-import scipy.stats as stats
-from itertools import groupby
-from operator import itemgetter
 from datetime import datetime as dt
 
 from telemanom._globals import Config
@@ -56,11 +47,9 @@ def run(config, _id, logger):
                     
                     # Generate or load predictions
                     # ===============================
-                    y_hat = []
                     if config.predict:
                         model = models.get_model(anom, X_train, y_train, logger, train=config.train)
                         y_hat = models.predict_in_batches(y_test, X_test, model, anom)
-                            
                     else:
                         y_hat = [float(x) for x in list(np.load(os.path.join("data", config.use_id, "y_hat", anom["chan_id"] + ".npy")))]
 
@@ -75,7 +64,7 @@ def run(config, _id, logger):
                     # Error processing (batch)
                     # =========================
 
-                    E_seq, E_seq_scores = err.process_errors(y_test, y_hat, e_s, anom, logger)
+                    E_seq, E_seq_scores = err.process_errors(y_test, e_s, logger)
                     anom['scores'] = E_seq_scores
 
                     anom = err.evaluate_sequences(E_seq, anom)
@@ -96,7 +85,3 @@ if __name__ == "__main__":
     helpers.make_dirs(_id)  
     logger = helpers.setup_logging(config, _id)
     run(config, _id, logger)
-
-
-
-    
